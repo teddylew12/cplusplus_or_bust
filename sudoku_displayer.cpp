@@ -1,27 +1,41 @@
+#include <array>
 #include <vector>
 #include <stdio.h>
 #include <string>
 #include <iostream>
 #include <stdlib.h>
-#define BOARD_SIZE 9
+#define boardSize 9
 using namespace std;
 //Compile Command: c++ -std=c++11 -o name
-int valid_input(int board[BOARD_SIZE][BOARD_SIZE],int row, int col){
-    bool valid=true;
+int valid_input(vector<int>& board ,int row, int col){
+    bool valid;
     int num;
     do{
-        num = rand() % 9;
         valid=true;
-        for (int i=0;i<9;++i){
-            if (board[row][i] == num || board[i][col] == num){
-                valid= false;
-                break;
-            }
+        num = rand() % 9;
+        if (numInRow(board,row,num) || numInCol(board,col,num) || numInBox(board,row,col,num)){
+            valid = false;
         }
     } while (!valid);
     return num;
 }
-bool valid_in_box(int board[BOARD_SIZE][BOARD_SIZE], int row,int col,int proposed_num){
+bool numInRow(vector<int>& board, int row,int proposedNum){
+    for (int i=0;i<9;++i){
+        if (board[row*boardSize + i] == proposedNum){
+            return true;
+            }
+    }
+    return false;
+}
+bool numInCol(vector<int>& board, int col,int proposedNum){
+    for (int i=0;i<9;++i){
+        if (board[i*boardSize + col] == proposedNum){
+            return true;
+            }
+    }
+    return false;
+}
+bool numInBox(vector<int>& board, int row,int col,int proposedNum){
     int start_of_box_row, start_of_box_col;
     /*Get the top left corner of your box
     row%3 is the left over of your row, so row-row%3 gets you to the top row
@@ -31,20 +45,21 @@ bool valid_in_box(int board[BOARD_SIZE][BOARD_SIZE], int row,int col,int propose
     start_of_box_col = col - col %3;
     for (int row =0;row<3;row++){
         for (int col=0;col<3;col++){
-            if (board[row+start_of_box_row][col+start_of_box_col]==proposed_num){
+            if (board[(row+start_of_box_row)*boardSize + col+start_of_box_col]==proposedNum){
                 return false;
             }
         }
     }
+    return true;
 }
     
-int get_valid_column(int board[BOARD_SIZE][BOARD_SIZE], int row){
+int getValidColumn(vector<int>& board, int row){
     int num;
     bool valid=true;
     do{
         num = rand() % 9;
         valid=true;
-        if (board[row][num] != 0){
+        if (board[row*boardSize + num] != 0){
             valid= false;
             break;
         }
@@ -52,11 +67,11 @@ int get_valid_column(int board[BOARD_SIZE][BOARD_SIZE], int row){
     return num;
 }
 
-int get_num_filled(int board[BOARD_SIZE][BOARD_SIZE]){
+int getNumFilled(vector<int>& board){
     int count =0;
     for (int i=0;i<9;++i){
         for (int j=0;j<9;++j){
-            if (board[i][j]!=0){
+            if (board[i*boardSize + j]!=0){
                 count+=1;
             }
         }
@@ -65,12 +80,12 @@ int get_num_filled(int board[BOARD_SIZE][BOARD_SIZE]){
     }
     
 
-void pretty_print_matrix(int board[BOARD_SIZE][BOARD_SIZE]){
+void prettyPrintMatrix(vector<int>& board){
     cout<<"___________________"<<endl;
     for (int i=0;i<9;++i){
         string line="|";
         for (int j=0;j<9;++j){           
-            line += to_string(board[i][j]);
+            line += to_string(board[i*boardSize + j]);
             if ((j+1) % 3==0){
                 line +="|";
             }
@@ -86,29 +101,29 @@ void pretty_print_matrix(int board[BOARD_SIZE][BOARD_SIZE]){
     }
 }
 int main(){
-    int sudoku_board[BOARD_SIZE][BOARD_SIZE];
-    for (int i=0;i<BOARD_SIZE;i++){
-        for (int j=0;j<BOARD_SIZE;j++){
-            sudoku_board[i][j]= 0;
+    vector <int> sudokuBoard;
+    for (int i=0;i<boardSize;i++){
+        for (int j=0;j<boardSize;j++){
+            sudokuBoard[boardSize*i + j]= 0;
         }
     }
     vector<int> rs, cs,vs;
     for (int i=0;i<25;i++){
         int r = rand() % 9;
         rs.push_back(r);
-        int c= get_valid_column(sudoku_board,r); 
+        int c= getValidColumn(sudokuBoard,r); 
         cs.push_back(c);
-        int num = valid_input(sudoku_board,r,c);
+        int num = valid_input(sudokuBoard,r,c);
         vs.push_back(num);
-        sudoku_board[r][c]= num;
+        sudokuBoard[r*boardSize + c]= num;
     }
     for (size_t i=0;i<rs.size();++i){
         printf("Row: %d, Col %d ,Val %d\n",rs[i]+1,cs[i]+1,vs[i]);
     }
     int filled;
-    filled = get_num_filled(sudoku_board);
+    filled = getNumFilled(sudokuBoard);
     printf("Total Number Filled %d \n",filled);
-    pretty_print_matrix(sudoku_board);
+    prettyPrintMatrix(sudokuBoard);
     
 
     return 0;
