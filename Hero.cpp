@@ -1,4 +1,7 @@
 #include "Hero.h"
+#include "Attack.h"
+#include "ElemAttack.h"
+#include "NormAttack.h"
 #include <string>
 #include <iostream>
 Hero::Hero() {
@@ -57,15 +60,35 @@ void Hero::print() {
 }
 bool Hero::fight(Hero& opponent) {
 	int ct = 0;
+	int choice;
+	//Loop while both fighters are alive
 	while ((opponent.getCurrentHealth() > 0) && (m_currentHealth > 0)) {
+		
+		printAllAttacks();
+		bool invalid = true;
+		while (invalid) {
+			std::cout << "Pick an attack! Choose a number between 1 and " << m_allAttacks.size() << std::endl;
+			std::cin >> choice;
+			if ((choice > 0) && (choice <= m_allAttacks.size())) {
+				invalid = false;
+			}
+			else {
+				std::cout << "Invalid option!" << std::endl;
+			}
+		}
+		//Lower healths based on accuracy ad multplier
+		Attack* currentAttack = m_allAttacks[choice-1];
+		opponent.setCurrentHealth(opponent.getCurrentHealth() - (currentAttack->use() * m_powerLevel));
+		Attack* opponentAttack = opponent.allAttacks()[rand() % opponent.allAttacks().size()];
+		setCurrentHealth(m_currentHealth - opponentAttack->use() * opponent.getPowerLevel());
 		ct++;
 		std::cout << "Turn: " << ct << std::endl;
 		std::cout << m_name << " Health: " << m_currentHealth << std::endl;
 		std::cout << opponent.getName() << " Health: " << opponent.getCurrentHealth() << std::endl;
-		opponent.setCurrentHealth(opponent.getCurrentHealth() - m_powerLevel);
-		setCurrentHealth(m_currentHealth-opponent.getPowerLevel());
+		std::cout << "__________________________________" << std::endl;
 	}
-	if (m_currentHealth < 0) {
+	//Check whom won
+	if (m_currentHealth == 0) {
 		return false;
 	}
 	else {
@@ -83,4 +106,24 @@ int Hero::getCurrentHealth() {
 }
 int Hero::getPowerLevel() {
 	return m_powerLevel;
+}
+
+void Hero::addEAttack() {
+	ElemAttack* newattack = new ElemAttack();
+	m_allAttacks.push_back(newattack);
+}
+void Hero::addNAttack() {
+	NormAttack* newNormAttack = new NormAttack();
+	m_allAttacks.push_back(newNormAttack);
+}
+void Hero::printAllAttacks() {
+	for (Attack* attack : m_allAttacks) {
+		std::cout << "Attack Type: " << attack->type() << std::endl;
+		std::cout << "Accuracy: " << attack->accuracy() << std::endl;
+		std::cout << "Multiplier: " << attack->multiplier() << std::endl;
+		std::cout << "-----------------------" << std::endl;
+	}
+}
+std::vector<Attack*>& Hero::allAttacks() {
+	return m_allAttacks;
 }

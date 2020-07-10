@@ -21,10 +21,41 @@ int main() {
 
 	std::cin >> warriorName;
 	Hero yourHero = Hero(warriorName);
+	bool addAttacks = true;
+	char attackChoice;
+	//Let user add attacks
+	while (addAttacks) {
+		std::cout << "Add your hero's attacks!\n E for Elemental, N for Normal, Q to quit" << std::endl;
+		std::cin >> attackChoice;
+		if ((attackChoice == 'e') || (attackChoice == 'E')) {
+			ElemAttack* newElem = new ElemAttack();
+			yourHero.allAttacks().push_back(newElem);
+		}
+		else if ((attackChoice == 'n') || (attackChoice == 'N')) {
+			NormAttack* newNorm = new NormAttack();
+			yourHero.allAttacks().push_back(newNorm);
+		}
+		else if ((attackChoice == 'q') || (attackChoice == 'Q')) {
+			if (yourHero.allAttacks().size() < 2) {
+				std::cout << "You need at least 2 attacks! Add some more" << std::endl;
+			}
+			else {
+				addAttacks = false;
+			}
+		}
+		else {
+			std::cout << "Invalid option" << std::endl;
+		}
+	}
 	bool running = true;
 	//Start interaction loop
 	while (running) {
 		int choice;
+		opponent = Hero(opponentNames[rand() % 5]);
+		ElemAttack* oppElem = new ElemAttack();
+		NormAttack* oppNorm = new NormAttack();
+		opponent.allAttacks().push_back(oppElem);
+		opponent.allAttacks().push_back(oppNorm);
 		//Get User input
 		std::cout << "Menu:\n1)Print Info\n2)Heal\n3)Fight\n4)Quit\nChoose: ";
 		std::cin >> choice;
@@ -39,7 +70,6 @@ int main() {
 			break;
 		case 3:
 			//Fight
-			opponent = Hero(opponentNames[rand() % 5]);
 			//Check if hero can fight
 			if (yourHero.getCurrentHealth()>0) {
 				winner = yourHero.fight(opponent);
